@@ -48,7 +48,8 @@ legend("topright",
 # Comparison of CDF's
 plot(ecdf(d),main = "Porazdelitvena funkcija odskodnin",
      ylab = "Porazdelitvena funkcija",
-     xlab="Visina odskodnine")
+     xlab="Visina odskodnine", 
+     cex = 0.5)
 
 curve(pweibull(x, shape = shape, scale = scale),
       add = TRUE, 
@@ -79,7 +80,7 @@ varS = varY*eN + (eY^2)*varN # = 230.5949
 
 # 2. Naloga
 
-#a.) Discretisation of Y = Weibull 
+#a.) Discretization of Y = Weibull 
 
 disY = discretize(pweibull(x, shape = shape, scale = scale),
                   method = 'rounding', 
@@ -90,7 +91,7 @@ disY = discretize(pweibull(x, shape = shape, scale = scale),
 # CPF of disY
 cmY = stepfun(seq(0, 9.5, 0.5), diffinv(disY))
 
-#b.) Plot of CPF of Y and its discretisation
+#b.) Plot of CPF of Y and its discretization
 
 plot(cmY, 
      main = "Weibullova porazdelitev",
@@ -106,20 +107,26 @@ curve(pweibull(x, shape = shape, scale = scale ),
 
 #c.) Approximation of distribution of S using Panjer recursion
 
+disYPanjer = discretize(pweibull(x, shape = shape, scale = scale),
+                        method = 'rounding', 
+                        from = 0, 
+                        to = 100000, 
+                        step = 0.5)
+
 pdfPanjer = aggregateDist(method = 'recursive',
                           model.freq = 'poisson',
                           lambda = 10,
-                          model.sev = disY,
+                          model.sev = disYPanjer,
                           x.scale = 0.5, 
-                          tol = 0.01,
-                          maxit = 100000)
+                          tol = 0.001,
+                          maxit = 100000000)
 
 
 #d.) Calc of E(cdfPanjer) and Var(cdfPanjer)
 
-eP = mean(pdfPanjer)
+eP = mean(pdfPanjer) # = 43.52655
 
-varP = sum((knots(pdfPanjer) - eP)^2 * diff(pdfPanjer))
+varP = sum((knots(pdfPanjer) - eP)^2 * diff(pdfPanjer))# = 227.097
 
 
 # 3. Naloga
@@ -146,20 +153,23 @@ for (i in 1:nSim) {
 
 #b.) Calc of mean and variance
 
-eSm = mean(valS)
-varSm = var(valS)
+eSm = mean(valS) # = 43.55653
+varSm = var(valS) # = 235.984
 
 # The values for E(S) and Var(S) from Monte Carlo simulation are approximately the
-# same as the values from 1.d and 2.d.
+# same as the values from 1.d and 2.d, so we cannot really derive the better 
+# method from our approaches.
 
 #c.) Comparison of CPF's from Panjer and Monte Carlo approximations
 
-plot(pdfPanjer)
+simGraph = plot(pdfPanjer,
+                cex = 0.1, 
+                pch = 16)
 
 plot(ecdf(t(as.matrix(valS))),
+     add = TRUE,
      col = 'green')
 
-curve(pdfPanjer)
 
 legend('bottomright', 
        legend = c('Panjerjev algoritem', 'Monte Carlo simulacija'),
@@ -168,6 +178,8 @@ legend('bottomright',
        cex=0.8,
        bty = 'n')
 
+# From the graph we can see that both methods are very similar in aproximating
+# the distribution.
 
 
 
